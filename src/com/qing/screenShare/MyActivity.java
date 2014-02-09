@@ -2,6 +2,7 @@ package com.qing.screenShare;
 
 import android.app.Activity;
 import android.os.Bundle;
+import util.SystemManager;
 
 public class MyActivity extends Activity {
     /**
@@ -11,5 +12,12 @@ public class MyActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        String apkRoot = "chmod 777 " + getPackageCodePath();
+
+    }
+
+    public void getRoot() {
+        String apkRoot = "chmod 777 " + getPackageCodePath();
+        SystemManager.RootCommand(apkRoot);
     }
 }
