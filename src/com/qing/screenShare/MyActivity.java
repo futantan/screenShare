@@ -8,11 +8,11 @@ import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import util.LogUtil;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -73,19 +73,19 @@ public class MyActivity extends Activity {
                     "/dev/graphics/fb0"));
             DataInputStream localDataInputStream = new DataInputStream(
                     localInputStream);
-            Log.e("mytest", "-----read start-------");
+            LogUtil.log("-----read start-------");
             localDataInputStream.readFully(arrayOfByte);
-            Log.e("mytest", "-----read end-------time = " + (System.currentTimeMillis() - tmp));
+            LogUtil.log("-----read end-------time = " + (System.currentTimeMillis() - tmp));
             localInputStream.close();
-            Log.e("mytest", "-----1-------");
+            LogUtil.log("-----1-------");
             File toFile = new File(Environment.getExternalStorageDirectory() + "/a.png");
-            Log.e("mytest", toFile.getAbsolutePath());
+            LogUtil.log(toFile.getAbsolutePath());
             FileOutputStream out = new FileOutputStream(toFile);
-            Log.e("mytest", "-----2-------");
+            LogUtil.log("-----2-------");
             int[] tmpColor = new int[width * height];
             int r, g, b;
             tmp = System.currentTimeMillis();
-            Log.e("mytest", "-----bitmap start-------");
+            LogUtil.log("-----bitmap start-------");
             for (int j = 0; j < width * height * depth; j += depth) {
                 b = arrayOfByte[j] & 0xff;
                 g = arrayOfByte[j + 1] & 0xff;
@@ -94,17 +94,16 @@ public class MyActivity extends Activity {
             }
             Bitmap tmpMap = Bitmap.createBitmap(tmpColor, width, height,
                     Bitmap.Config.ARGB_8888);
-            Log.e("mytest", "-----bitmap end-------time = " + (System.currentTimeMillis() - tmp));
+            LogUtil.log("-----bitmap end-------time = " + (System.currentTimeMillis() - tmp));
 
             tmp = System.currentTimeMillis();
-
-            Log.e("mytest", "-----compress start-------");
+            LogUtil.log("-----compress start-------");
             tmpMap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Log.e("mytest", "-----compress end-------time = " + (System.currentTimeMillis() - tmp));
+            LogUtil.log("-----compress end-------time = " + (System.currentTimeMillis() - tmp));
             out.close();
 
         } catch (Exception e) {
-            Log.e("mytest", "Exception");
+            LogUtil.log("Exception");
             e.printStackTrace();
         }
 
