@@ -2,11 +2,13 @@ package com.qing.screenShare;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -19,74 +21,90 @@ import java.io.InputStream;
 
 public class MyActivity extends Activity {
 
-    Button button;
+    Button button1;
+    Button button2;
+    Button button3;
+    Button button4;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
+        button1 = (Button) findViewById(R.id.button1);
+        button2 = (Button) findViewById(R.id.button2);
+        button3 = (Button) findViewById(R.id.button3);
+        button4 = (Button) findViewById(R.id.button4);
+
+
+        button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                acquireScreenshot(MyActivity.this);
+                getScreenShot(MyActivity.this);
             }
         });
 
+        button3.setOnClickListener(new StartServiceListener());
+        button4.setOnClickListener(new StopServiceListener());
+
     }
 
-    public void acquireScreenshot(Context mContext) {
+    /**
+     * 获取屏幕截图
+     *
+     * @param mContext 环境
+     */
+    public void getScreenShot(Context mContext) {
         DisplayMetrics metrics = new DisplayMetrics();
         WindowManager WM = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         Display display = WM.getDefaultDisplay();
         display.getMetrics(metrics);
         int height = metrics.heightPixels; // 屏幕高
         int width = metrics.widthPixels; // 屏幕的宽
-        int pixelformat = display.getPixelFormat();
+        int pixelFormat = display.getPixelFormat();
         PixelFormat localPixelFormat1 = new PixelFormat();
-        PixelFormat.getPixelFormatInfo(pixelformat, localPixelFormat1);
-        int deepth = localPixelFormat1.bytesPerPixel;// 位深
+        PixelFormat.getPixelFormatInfo(pixelFormat, localPixelFormat1);
+        int depth = localPixelFormat1.bytesPerPixel;// 位深
 
-        byte[] arrayOfByte = new byte[height * width * deepth];
+        byte[] arrayOfByte = new byte[height * width * depth];
         long tmp = System.currentTimeMillis();
         try {
             InputStream localInputStream = readAsRoot(new File(
                     "/dev/graphics/fb0"));
-            System.out.println(localInputStream.toString());
             DataInputStream localDataInputStream = new DataInputStream(
                     localInputStream);
-            android.util.Log.e("mytest", "-----read start-------");
+            Log.e("mytest", "-----read start-------");
             localDataInputStream.readFully(arrayOfByte);
-            android.util.Log.e("mytest", "-----read end-------time = " + (System.currentTimeMillis() - tmp));
+            Log.e("mytest", "-----read end-------time = " + (System.currentTimeMillis() - tmp));
             localInputStream.close();
-            android.util.Log.e("mytest", "-----1-------");
+            Log.e("mytest", "-----1-------");
             File toFile = new File(Environment.getExternalStorageDirectory() + "/a.png");
-            android.util.Log.e("mytest", toFile.getAbsolutePath());
+            Log.e("mytest", toFile.getAbsolutePath());
             FileOutputStream out = new FileOutputStream(toFile);
-            android.util.Log.e("mytest", "-----2-------");
+            Log.e("mytest", "-----2-------");
             int[] tmpColor = new int[width * height];
             int r, g, b;
             tmp = System.currentTimeMillis();
-            android.util.Log.e("mytest", "-----bitmap start-------");
-            for (int j = 0; j < width * height * deepth; j += deepth) {
+            Log.e("mytest", "-----bitmap start-------");
+            for (int j = 0; j < width * height * depth; j += depth) {
                 b = arrayOfByte[j] & 0xff;
                 g = arrayOfByte[j + 1] & 0xff;
                 r = arrayOfByte[j + 2] & 0xff;
-                tmpColor[j / deepth] = (r << 16) | (g << 8) | b | (0xff000000);
+                tmpColor[j / depth] = (r << 16) | (g << 8) | b | (0xff000000);
             }
             Bitmap tmpMap = Bitmap.createBitmap(tmpColor, width, height,
                     Bitmap.Config.ARGB_8888);
-            android.util.Log.e("mytest", "-----bitmap end-------time = " + (System.currentTimeMillis() - tmp));
+            Log.e("mytest", "-----bitmap end-------time = " + (System.currentTimeMillis() - tmp));
 
             tmp = System.currentTimeMillis();
-            android.util.Log.e("mytest", "-----compress start-------");
+
+            Log.e("mytest", "-----compress start-------");
             tmpMap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            android.util.Log.e("mytest", "-----compress end-------time = " + (System.currentTimeMillis() - tmp));
+            Log.e("mytest", "-----compress end-------time = " + (System.currentTimeMillis() - tmp));
             out.close();
 
         } catch (Exception e) {
-            android.util.Log.e("mytest", "Exception");
+            Log.e("mytest", "Exception");
             e.printStackTrace();
         }
 
@@ -97,5 +115,25 @@ public class MyActivity extends Activity {
         String str = "cat " + paramFile.getAbsolutePath() + "\n";
         localProcess.getOutputStream().write(str.getBytes());
         return localProcess.getInputStream();
+    }
+
+    class StartServiceListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent();
+            intent.setClass(MyActivity.this, ScreenShootService.class);
+            startService(intent);
+        }
+    }
+
+    class StopServiceListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent();
+            intent.setClass(MyActivity.this, ScreenShootService.class);
+            stopService(intent);
+        }
     }
 }
