@@ -102,7 +102,6 @@ public class MyActivity extends Activity {
             LogUtil.log("-----compress end-------time = " + (System.currentTimeMillis() - tmp));
             out.close();
 
-
         } catch (Exception e) {
             LogUtil.log("Exception");
             e.printStackTrace();
