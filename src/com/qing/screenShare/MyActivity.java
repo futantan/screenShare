@@ -66,6 +66,7 @@ public class MyActivity extends Activity {
         PixelFormat.getPixelFormatInfo(pixelFormat, localPixelFormat1);
         int depth = localPixelFormat1.bytesPerPixel;// 位深
 
+
         byte[] arrayOfByte = new byte[height * width * depth];
         long tmp = System.currentTimeMillis();
         try {
